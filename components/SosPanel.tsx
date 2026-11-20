@@ -147,6 +147,36 @@ export function SosPanel() {
   }, [activeAlertId, resolved]);
 
   const count = contacts.data?.length ?? 0;
+  const geoNeedsFix = geo.status === "denied" || geo.status === "insecure";
+  const canRequestLocation =
+    geo.status === "idle" ||
+    geo.status === "prompting" ||
+    geo.status === "denied" ||
+    geo.status === "unavailable";
+  const geoTitle =
+    geo.status === "granted"
+      ? "Live location on"
+      : geo.status === "insecure"
+        ? "Location needs HTTPS"
+        : geo.status === "denied"
+          ? "Location blocked in browser"
+          : geo.status === "unsupported"
+            ? "Location unsupported"
+            : geo.status === "unavailable"
+              ? "GPS unavailable"
+              : "Enable location during setup";
+  const geoBody =
+    geo.status === "granted"
+      ? "Trusted contacts will see your live position during an alert."
+      : geo.status === "insecure"
+        ? "Browsers only share location over HTTPS or localhost. Open this app on localhost or through an HTTPS tunnel."
+        : geo.status === "denied"
+          ? "Allow location for this site in the browser's site settings (padlock icon), then retry."
+          : geo.status === "unsupported"
+            ? "This browser does not support geolocation."
+            : geo.status === "unavailable"
+              ? "GPS unavailable right now — using the last known position."
+              : "Requested up-front so SOS works instantly in an emergency.";
 
   if (contacts.isError) {
     return <p className="text-sm text-signal-soft">Could not load contacts.</p>;
@@ -182,34 +212,24 @@ export function SosPanel() {
         <div className="flex items-start gap-3">
           <MapPinIcon
             className={`mt-0.5 h-5 w-5 shrink-0 ${
-              geo.status === "granted" ? "text-safe" : "text-faint"
+              geo.status === "granted"
+                ? "text-safe"
+                : geoNeedsFix
+                  ? "text-caution"
+                  : "text-faint"
             }`}
           />
           <div>
-            <p className="text-sm font-medium text-chalk">
-              {geo.status === "granted"
-                ? "Live location on"
-                : geo.status === "denied" || geo.status === "unsupported"
-                  ? "Location unavailable"
-                  : "Enable location during setup"}
-            </p>
-            <p className="mt-0.5 text-xs leading-relaxed text-mist">
-              {geo.status === "denied"
-                ? "SOS will share only your last known position."
-                : geo.status === "unavailable"
-                  ? "GPS unavailable right now — using last known position."
-                  : geo.status === "granted"
-                    ? "Trusted contacts will see your live position during an alert."
-                    : "Requested up-front so SOS works instantly in an emergency."}
-            </p>
+            <p className="text-sm font-medium text-chalk">{geoTitle}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-mist">{geoBody}</p>
           </div>
         </div>
-        {(geo.status === "idle" || geo.status === "prompting") && (
+        {canRequestLocation && (
           <button
             onClick={() => geo.requestPermission()}
             className="shrink-0 rounded-lg border border-line-bright px-3 py-1.5 font-mono text-xs font-medium text-chalk transition-colors hover:border-safe/60 hover:text-safe-soft"
           >
-            Enable
+            {geo.status === "denied" ? "Retry" : "Enable"}
           </button>
         )}
       </div>

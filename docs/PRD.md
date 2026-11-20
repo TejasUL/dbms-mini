@@ -64,7 +64,7 @@ Existing emergency systems depend heavily on verbal communication.
 | --- | --- |
 | Silent SOS | Tap or 600ms long-press; no sound, modal or success animation |
 | Live location | Browser geolocation; 12s updates while alert active; last-known fallback |
-| Emergency contacts | Max 5 trusted contacts; phone required, email optional |
+| Emergency contacts | Max 5 trusted contacts; phone + email required |
 | Notifications | Email only, queued in-process with retry/failure tracking |
 | Alert tracking | `sent`, `acknowledged`, `resolved`; timestamped activity log |
 | Public tracking | Unguessable token; view-only; stops updating when resolved |
@@ -98,7 +98,7 @@ Existing emergency systems depend heavily on verbal communication.
 1. User creates an account and adds emergency contacts.
 2. User enables location during onboarding (not at the crisis moment).
 3. User triggers the silent SOS (tap or long-press).
-4. Alert is created; each contact with an email gets a tokenized tracking link.
+4. Alert is created; every contact gets a tokenized tracking link by email.
 5. Location fixes stream to the server and to the tracking page.
 6. Contacts open the link, see the live map, and acknowledge.
 7. The user resolves the alert; the public link shows the final state.

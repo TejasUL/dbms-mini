@@ -24,17 +24,18 @@ export const updateUserSchema = z.object({
 export const contactCreateSchema = z.object({
   name: z.string().trim().min(1, "name is required").max(120),
   phone: phoneSchema,
-  email: z.email("enter a valid email").transform((value) => value.trim().toLowerCase()).optional(),
+  email: z.email("enter a valid email").transform((value) => value.trim().toLowerCase()),
   relationship: z.string().trim().min(1).max(80).optional(),
 });
 
 export const contactUpdateSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   phone: phoneSchema.nullish(),
+  // Email is the only notification channel, so it can no longer be cleared.
   email: z
     .email("enter a valid email")
     .transform((value) => value.trim().toLowerCase())
-    .nullish(),
+    .optional(),
   relationship: z.string().trim().min(1).max(80).nullish(),
 });
 

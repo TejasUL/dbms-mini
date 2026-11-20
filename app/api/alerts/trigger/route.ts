@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { getAuthUser } from "@/lib/server/auth";
 import { triggerAlert } from "@/lib/server/alerts";
+import { resolveBaseUrl } from "@/lib/server/base-url";
 import { apiHandler } from "@/lib/server/handler";
 import { fail, json, parseBody } from "@/lib/server/http";
 import { limiterKey, rateLimit } from "@/lib/server/rate-limit";
@@ -26,6 +27,6 @@ export async function POST(request: NextRequest) {
 
     const parsed = await parseBody(request, triggerAlertSchema);
     if (!parsed.ok) return parsed.response;
-    return json(await triggerAlert(user.id, parsed.data), 201);
+    return json(await triggerAlert(user.id, parsed.data, resolveBaseUrl(request)), 201);
   });
 }

@@ -59,7 +59,7 @@ async function assertNoDuplicate(
 
 export async function createContact(
   userId: string,
-  input: { name: string; phone: string; email?: string; relationship?: string },
+  input: { name: string; phone: string; email: string; relationship?: string },
 ): Promise<EmergencyContactDto> {
   const count = await prisma.emergencyContact.count({ where: { userId } });
   if (count >= MAX_CONTACTS) {
@@ -74,7 +74,7 @@ export async function createContact(
         userId,
         name: input.name,
         phone: input.phone,
-        email: input.email ?? null,
+        email: input.email,
         relationship: input.relationship ?? null,
       },
     });
@@ -94,7 +94,7 @@ export async function updateContact(
   input: {
     name?: string;
     phone?: string | null;
-    email?: string | null;
+    email?: string;
     relationship?: string | null;
   },
 ): Promise<EmergencyContactDto> {

@@ -57,6 +57,8 @@ export async function triggerAlert(
     longitude?: number;
     accuracy?: number;
   },
+  /** Public base URL for the tracking link (network URL, not localhost). */
+  baseUrl?: string,
 ): Promise<AlertDto> {
   const alert = await prisma.alert.create({ data: { userId } });
 
@@ -73,7 +75,7 @@ export async function triggerAlert(
   }
 
   await createDeliveriesForAlert(alert, userId);
-  void dispatchAlertNotifications(alert.id).catch((error) => {
+  void dispatchAlertNotifications(alert.id, baseUrl).catch((error) => {
     console.error(`[alerts] notification dispatch for ${alert.id} failed`, error);
   });
 

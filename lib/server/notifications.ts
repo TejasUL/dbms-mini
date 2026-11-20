@@ -1,5 +1,6 @@
 import type { Alert, EmergencyContact, NotificationDelivery } from "@prisma/client";
 import type { NotificationDeliveryDto, NotificationStatus } from "@/lib/types";
+import { resolveBaseUrl } from "./base-url";
 import { prisma } from "./db";
 import { emailHtml, emailSubject, sendEmail } from "./email";
 import { ApiError } from "./errors";
@@ -7,10 +8,6 @@ import { ApiError } from "./errors";
 const MAX_ATTEMPTS = 3;
 const BACKOFF_MS = [0, 250, 1_000];
 const inFlight = new Set<string>();
-
-function trackingBase(): string {
-  return (process.env.WEB_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -46,17 +43,20 @@ export async function createDeliveriesForAlert(alert: Alert, userId: string): Pr
 }
 
 /** Queue all queued deliveries for one alert without blocking the request. */
-export async function dispatchAlertNotifications(alertId: string): Promise<void> {
+export async function dispatchAlertNotifications(
+  alertId: string,
+  baseUrl?: string,
+): Promise<void> {
   const deliveries = await prisma.notificationDelivery.findMany({
     where: { alertId, status: "queued" },
     select: { id: true },
   });
   for (const delivery of deliveries) {
-    void processDelivery(delivery.id);
+    void processDelivery(delivery.id, baseUrl);
   }
 }
 
-async function processDelivery(deliveryId: string): Promise<void> {
+async function processDelivery(deliveryId: string, baseUrl?: string): Promise<void> {
   if (inFlight.has(deliveryId)) return;
   inFlight.add(deliveryId);
 
@@ -70,7 +70,7 @@ async function processDelivery(deliveryId: string): Promise<void> {
     });
     if (!delivery || delivery.status !== "queued" || !delivery.contact.email) return;
 
-    const trackingUrl = `${trackingBase()}/track/${delivery.alert.trackingToken}`;
+    const trackingUrl = `${baseUrl ?? resolveBaseUrl()}/track/${delivery.alert.trackingToken}`;
     const subject = emailSubject(delivery.alert.user.name);
     const html = emailHtml({
       userName: delivery.alert.user.name,
@@ -113,7 +113,7 @@ async function processDelivery(deliveryId: string): Promise<void> {
 }
 
 /** Re-drive failed deliveries for an alert (admin only at the route layer). */
-export async function retryFailedAdmin(alertId: string): Promise<number> {
+export async function retryFailedAdmin(alertId: string, baseUrl?: string): Promise<number> {
   const alert = await prisma.alert.findUnique({ where: { id: alertId } });
   if (!alert) throw new ApiError(404, "Alert not found.");
 
@@ -129,7 +129,7 @@ export async function retryFailedAdmin(alertId: string): Promise<number> {
     });
   }
 
-  await dispatchAlertNotifications(alertId);
+  await dispatchAlertNotifications(alertId, baseUrl);
   return failed.length;
 }
 

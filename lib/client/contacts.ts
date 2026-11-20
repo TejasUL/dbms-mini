@@ -9,7 +9,7 @@ export const contactsQueryKey = ["contacts"] as const;
 export interface ContactInput {
   name: string;
   phone: string;
-  email?: string;
+  email: string;
   relationship?: string;
 }
 

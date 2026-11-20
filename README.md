@@ -76,7 +76,7 @@ flowchart LR
 ### SOS data flow
 
 1. The user taps or long-presses the silent dial on `/`.
-2. `POST /api/alerts/trigger` creates an `Alert` (status `sent`) and one `NotificationDelivery` per contact **with an email**.
+2. `POST /api/alerts/trigger` creates an `Alert` (status `sent`) and one `NotificationDelivery` per contact.
 3. The browser starts a 12-second location loop and persists each fix with `POST /api/alerts/:id/location`; updates are broadcast to the owner and tracking SSE channels.
 4. Contacts open the emailed `/track/<token>` link and see the live map, status and timestamps.
 5. Contacts can acknowledge; the user (or a contact) can resolve the alert. Every transition is written to `activity_logs`.
@@ -150,7 +150,7 @@ all application code uses Next's own HMR.
 | `DATABASE_URL` | `file:./dev.db` | SQLite file under `prisma/` |
 | `JWT_SECRET` | dev value | Change for anything shared; signs the session cookie |
 | `ADMIN_EMAILS` | `admin@bsafe.test` | Comma-separated emails promoted to admin |
-| `WEB_BASE_URL` | `http://localhost:3000` | Used to build `/track/<token>` links |
+| `WEB_BASE_URL` | *(empty — auto-detect)* | Base for `/track/<token>` email links. Empty uses the request host, falling back to the machine's LAN IP when opened via localhost. Set it to a tunnel/domain when the app is shared. |
 | `EMAIL_DRY_RUN` | `true` | Logs emails and marks deliveries `sent` |
 | `SMTP_HOST/PORT/USER/PASS/FROM_EMAIL/FROM_NAME/SECURE` | – | Used only when `EMAIL_DRY_RUN=false` |
 
@@ -198,14 +198,14 @@ All routes are under `/api` and individually rate-limited. Full request/response
 5. Open `/admin` as `admin@bsafe.test` and watch the alert/locations/delivery counts update.
 6. Copy the tracking token from Prisma Studio (`npm run db:studio` → `alerts.tracking_token`) and open `/track/<token>` in a private window. The map should follow new fixes and the acknowledge button should move the alert to `acknowledged`.
 7. Resolve the alert from `/`; the tracking page should show the resolved state and stop updating.
-8. With `EMAIL_DRY_RUN=true`, the server console logs the tracking link email for each contact with an email.
+8. With `EMAIL_DRY_RUN=true`, the server console logs the tracking link email for each contact.
 
 ---
 
 ## Notes & limitations
 
 - Single-process demo: rate-limit counters, cache and SSE event channels live in memory. They reset on restart and do not scale horizontally.
-- Email is the only notification channel. Contacts without an email receive no delivery row.
+- Email is the only notification channel and is required on every contact.
 - The browser Geolocation API requires HTTPS or `localhost`; background tabs may throttle `watchPosition`.
 - No automated test suite (matching the original project's scope); verification is manual.
 - The original project's production deployment notes do not apply; this build targets a local single-process demo.

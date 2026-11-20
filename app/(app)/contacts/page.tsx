@@ -71,7 +71,7 @@ function ContactForm({
     onSubmit({
       name: name.trim(),
       phone: trimmedPhone,
-      email: email.trim() || undefined,
+      email: email.trim(),
       relationship: relationship.trim() || undefined,
     });
   };
@@ -104,10 +104,12 @@ function ContactForm({
       )}
       <LabeledInput
         id="contact-email"
-        label="Email (optional)"
+        label="Email"
         type="email"
+        required
+        placeholder="name@example.com"
         value={email}
-        hint="Add an email so this contact receives the live tracking link."
+        hint="Required — the live tracking link is sent here."
         onChange={(event) => setEmail(event.target.value)}
       />
       <LabeledInput

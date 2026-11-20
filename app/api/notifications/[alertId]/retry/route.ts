@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getAuthUser } from "@/lib/server/auth";
+import { resolveBaseUrl } from "@/lib/server/base-url";
 import { apiHandler } from "@/lib/server/handler";
 import { fail, json } from "@/lib/server/http";
 import { retryFailedAdmin } from "@/lib/server/notifications";
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     const { alertId } = await params;
-    const requeued = await retryFailedAdmin(alertId);
+    const requeued = await retryFailedAdmin(alertId, resolveBaseUrl(request));
     return json({ requeued }, 202);
   });
 }

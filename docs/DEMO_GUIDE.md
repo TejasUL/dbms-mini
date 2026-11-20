@@ -59,10 +59,12 @@ Invoke-RestMethod http://localhost:3000/api/health
 Email delivery is **dry-run by default**. After triggering an SOS, the terminal prints one line per contact:
 
 ```text
-[email dry-run] to=sunita.mum@example.com subject="bSafe SOS from Priya Sharma" link=http://localhost:3000/track/<token>
+[email dry-run] to=sunita.mum@example.com subject="bSafe SOS from Priya Sharma" link=http://192.168.1.20:3000/track/<token>
 ```
 
-Copy that `link` into browser window 2. If the logs have scrolled, open Prisma Studio → `alerts` table → copy `tracking_token` and open `http://localhost:3000/track/<token>`.
+The link uses the address the app was opened on, falling back to this machine's LAN IP when opened via `localhost`, so a phone on the same network can actually open it. (`WEB_BASE_URL` overrides this for tunnels/domains.)
+
+Copy that `link` into browser window 2. If the logs have scrolled, open Prisma Studio → `alerts` table → copy `tracking_token` and open `http://<LAN-IP>:3000/track/<token>`.
 
 ---
 
@@ -85,7 +87,7 @@ Click **Contacts**.
 Show:
 
 - 5 seeded trusted contacts and the `5/5 SLOTS` indicator.
-- Phone must be E.164 (`+919876543210`), email is optional.
+- Phone must be E.164 (`+919876543210`); email is required.
 - Add/edit/remove forms.
 - Duplicate phone or email is rejected with `409`.
 - A 6th contact is rejected with `400` because the service caps contacts at 5.
@@ -130,7 +132,7 @@ Open the terminal. Point at:
 
 ```text
 POST /api/alerts/trigger 201
-[email dry-run] ... link=http://localhost:3000/track/<token>
+[email dry-run] ... link=http://192.168.1.20:3000/track/<token>
 ```
 
 Say:
@@ -139,7 +141,7 @@ Say:
 > 1. creates the `alerts` row in `sent`,
 > 2. writes a `triggered` activity log,
 > 3. stores the first location if one exists,
-> 4. creates one `notification_deliveries` row per contact with an email,
+> 4. creates one `notification_deliveries` row per contact,
 > 5. queues the email dispatch in the background so the response is not blocked.
 
 Note that **SMS is intentionally absent** in this build; email is the only outbound channel.

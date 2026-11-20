@@ -28,7 +28,7 @@ signed HttpOnly cookie (`bsafe_session`), not Firebase.
 | Method | Route | Auth | Rate limit | Notes |
 | --- | --- | --- | --- | --- |
 | GET | `/api/contacts` | ✅ | 30/min | cached 30s |
-| POST | `/api/contacts` | ✅ | 10/min | max 5, duplicate phone/email → 409, 201 |
+| POST | `/api/contacts` | ✅ | 10/min | max 5, `email` required, duplicate phone/email → 409, 201 |
 | PATCH | `/api/contacts/:id` | ✅ | 10/min | owner-scoped |
 | DELETE | `/api/contacts/:id` | ✅ | 10/min | 204 |
 

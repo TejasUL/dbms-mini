@@ -264,7 +264,7 @@ ORDER BY a.triggered_at DESC;
 
 ### Q37. Explain the email delivery flow.
 
-**A:** On trigger, one `notification_deliveries` row is created per contact with an email, status `queued`. A background function processes each delivery: increment `attempts`, call `sendEmail`, mark `sent` + `sentAt`, or retry up to 3 times with 0/250/1000ms backoff. After the final failure it marks `failed` and stores `last_error`. Admins can requeue failed deliveries.
+**A:** On trigger, one `notification_deliveries` row is created per contact, status `queued`. A background function processes each delivery: increment `attempts`, call `sendEmail`, mark `sent` + `sentAt`, or retry up to 3 times with 0/250/1000ms backoff. After the final failure it marks `failed` and stores `last_error`. Admins can requeue failed deliveries.
 
 ### Q38. Why "sent" is not "delivered"?
 
